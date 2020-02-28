@@ -5,6 +5,7 @@
 </template>
 
 <script>
+  import axios from 'axios'
   import newPostForm from '@/components/Admin/newPostForm.vue'
 
   export default {
@@ -12,21 +13,21 @@
     components: {
       newPostForm
     },
-    data () {
-      return {
-        post: {
-          id: 1,
-          title: '1 post',
-          descr: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
-          content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut',
-          img: 'https://lawnuk.com/wp-content/uploads/2016/08/sprogs-dogs.jpg'
-        },
-      }
+    asyncData (context) {
+        return axios.get(`https://blog-nuxt-38e13.firebaseio.com/posts/${context.params.postId}.json`)
+          .then(res => {
+            return {
+              post: {...res.data, id: context.params.postId}
+            }
+          })
+          .catch(e => context.error(e))
     },
     methods: {
       onSubmit (post) {
-        console.log('post Editing')
-        console.log(post)
+        this.$store.dispatch('editPost', post)
+          .then(() => {
+            this.$router.push('/admin')
+          })
       }
     }
   }

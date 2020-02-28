@@ -4,7 +4,7 @@
       <div class="container">
         <post :post="post" />
         <comments :comments="comments" />
-        <newComment />
+        <newComment :postId="$route.params.id"/>
       </div>
     </section>
   </div>
@@ -12,6 +12,8 @@
 
 
 <script>
+  import axios from 'axios'
+
   import post from '@/components/Blog/Post.vue'
   import newComment from '@/components/Comments/NewComment.vue'
   import comments from '@/components/Comments/Comments.vue'
@@ -22,25 +24,38 @@
       comments,
       newComment
     },
-    data () {
+    async asyncData (context) {
+      let [post, comments] = await Promise.all([
+        axios.get(`https://blog-nuxt-38e13.firebaseio.com/posts/${context.params.id}.json`),
+        axios.get(`https://blog-nuxt-38e13.firebaseio.com/comments.json`)
+      ])
+
+      if (!comments.data) {
+        comments.data = {};
+      }
+
+      // first variant
+
+      // let commentsArray = [],
+      //     commentsArrayRes = []
+      //
+      // Object.keys(comments.data).forEach(key => {
+      //   commentsArray.push(comments.data[key])
+      // })
+      //
+      // for(let i = 0; i < commentsArray.length; i++) {
+      //   if (commentsArray[i].postId === context.params.id && commentsArray[i].publish) {
+      //     commentsArrayRes.push(commentsArray[i])
+      //   }
+      // }
+
+      // second variant
+
+      let commentsArrayRes = Object.values(comments.data).filter(comment => (comment.postId === context.params.id) && comment.publish)
+
       return {
-        post: {
-          id: 1,
-          title: '1 post',
-          descr: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
-          content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut',
-          img: 'https://lawnuk.com/wp-content/uploads/2016/08/sprogs-dogs.jpg'
-        },
-        comments: [
-          {
-            name: 'Alex',
-            text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
-          },
-          {
-            name: 'Marina',
-            text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit'
-          }
-        ]
+        post: post.data,
+        comments: commentsArrayRes
       }
     }
   }

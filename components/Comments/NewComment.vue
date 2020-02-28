@@ -25,9 +25,13 @@
 </template>
 
 <script>
-
-
   export default {
+    props: {
+      postId: {
+        type: String, // строка, потому что firebase генерирует такие id
+        required: true
+      }
+    },
     data () {
       return {
         message: null,
@@ -39,12 +43,20 @@
     },
     methods: {
       onSubmit () {
-        this.message = 'Submited!'
+        this.$store.dispatch('addComment', {
+          postId: this.postId,
+          publish: false,
+          ...this.comment
+        })
+          .then(() => {
+            this.message = 'Submited!'
+            // Reset
+            this.comment.name = ''
+            this.comment.email = ''
+            this.comment.text = ''
+          })
+          .catch(e => console.log(e))
 
-        // Reset
-        this.comment.name = ''
-        this.comment.email = ''
-        this.comment.text = ''
       }
     }
   }
