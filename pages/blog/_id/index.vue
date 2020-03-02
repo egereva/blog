@@ -24,6 +24,23 @@
       comments,
       newComment
     },
+    head() {
+      let title = this.post.title,
+        descr = this.post.descr,
+        img = this.post.img, //но нужно указывать полный путь
+        type = 'site'
+
+      return {
+        title: title,
+        meta: [
+          { hid: 'description', name: 'description', content: descr},
+          { hid: 'og:description', name: 'og:description', content: descr},
+          { hid: 'og:title', name: 'og:title', content: title},
+          { hid: 'og:type', name: 'og:type', content: type},
+          { hid: 'og:img', name: 'og:img', content: img}
+        ]
+      }
+    },
     async asyncData (context) {
       let [post, comments] = await Promise.all([
         axios.get(`https://blog-nuxt-38e13.firebaseio.com/posts/${context.params.id}.json`),
